@@ -1,0 +1,8 @@
+eps	簇数
+eps=0.7	5
+eps=0.8	11
+eps=0.9	16
+eps=1	4
+eps=1.1	1
+eps=1.2	1
+eps=0.9_min_samples=4 16

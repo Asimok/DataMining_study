@@ -1,0 +1,453 @@
+<html><head>
+    
+
+<meta http-equiv=Content-Type content=text/html; charset=utf-8>
+<meta name=viewport content=width=device-width,initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no>
+<meta name=renderer content=webkit><!--内核渲染器-->
+<!--[if IE]><meta http-equiv=X-UA-Compatible content=IE=edge><![endif]--> <!--IE8/9及以后的版本都会以最高版本IE来渲染页面-->
+<meta name=format-detection content=telephone=no><!--手机号不被显示为拨号连接-->
+<meta http-equiv=X-UA-Compatible content=IE=edge>
+<link rel=shortcut icon href=/static/eleBusiness/img/favicon.ico charset=UTF-8>
+<link rel=stylesheet href=/static/plugins/bootstrap/css/bootstrap.min.css>
+<link rel=stylesheet type=text/css href=/static/dist/css/iview.css charset=UTF-8>
+<link rel=stylesheet type=text/css href=/static/eleBusiness/css/base.css>
+<link rel=stylesheet href=/static/portal/css/footer.css>
+<link rel=stylesheet type=text/css href=/static/portal/css/font.css>
+<link rel=stylesheet href=/static/portal/css/iconfont.css>
+<link rel=stylesheet href=/static/eleBusiness/font/iconfont.css>
+<link rel=stylesheet href=/static/portal/tools/iconfont.css>
+
+
+
+
+
+
+
+
+
+
+<script type=text/javascript async="" src=https://assets.growingio.com/vds.js></script><script src=/static/eleBusiness/js/jquery-1.8.3.min.js></script>
+<script src=/static/bootstrap/js/bootstrap.min.js></script>
+<script src=/static/dist/js/vue.js charset=UTF-8></script>
+<script src=/static/dist/js/jquery.cookie.js></script>
+
+
+<script src=/static/dist/js/iview.min.js charset=utf-8></script>
+
+<script>
+    var MCTX = '';
+</script>
+
+<script type=text/javascript>
+    var _vds = _vds || [];
+    window._vds = _vds;
+    (function(){
+        _vds.push(['setAccountId', '9311c428042bb76e']);
+        (function() {
+            var vds = document.createElement('script');
+            vds.type='text/javascript';
+            vds.async = true;
+            vds.src = ('https:' == document.location.protocol ? 'https://' : 'http://') + 'assets.growingio.com/vds.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(vds, s);
+        })();
+    })();
+</script>
+    <link rel=stylesheet type=text/css href=/static/eleBusiness/search/search.css>
+    
+<link rel=stylesheet href=/static/portal/css/page.css>
+<script type=text/javascript src=/static/portal/js/page.js></script>
+
+    
+    <script src=/static/eleBusiness/js/jquery.lazyload.js></script>
+    <title>搜索</title>
+    <script>
+        function lazyImg() {
+            $(img.lazy).lazyload({effect: fadeIn});//placeholder: images/lazy_bgimg.png,
+        }
+    
+    </script>
+</head>
+<body>
+<!--头部-->
+
+
+
+<!--头部-->
+<div id=head><div class=con><a href=/ class=logo><img src=/static/portal/img/logo.png alt=人民邮电出版社></a> <nav class=head-nav-fl fl><a href=/ title=首页 target=_blank>首页</a> <a href=/shopping/index title=图书 target=_blank class=active>图书</a><a href=/periodical title=期刊 target=_blank>期刊</a><a href=/?path=1 title=服务 target=_blank>服务</a><a href=/newsInfo/list title=新闻活动 target=_blank>新闻活动</a><a href=/party title=企业党建 target=_blank>企业党建</a><a href=https://ptpress.zhiye.com/ title=招贤纳士 target=_blank>招贤纳士</a><a href=/p/z/1523255307009.html title=关于我们 target=_blank>关于我们</a></nav> <nav class=head-nav-fr fr><a href=/shopping/car class=cart><i class=icon iconfont icon-gouwuche2></i>(<span>0</span>)
+            </a>  <a href=/login target=_blank class=login style=margin-left: 20px;>登录</a> <s>|</s> <a href=/reg>注册</a></nav></div></div>
+<script>
+    var head = new Vue({
+        el:#head,
+        data:{
+            cartNum:0,
+            menuList:[]
+        },
+        mounted: function () {
+            var userName = '';
+            var _this = this;
+            //购物车数量
+            if(userName){
+                $.ajax({
+                    type: 'POST',
+                    url: '/shopCart/getShopCartList',
+                    data: {},
+                    dataType: 'json',
+                    async: false,
+                    success: function (res) {
+                        _this.items = res.data;
+                        var carSums=0;
+                        $.each(_this.items, function (index, item) {
+                            carSums +=item.quantity;
+                        });
+
+                        _this.cartNum = carSums;
+                    },
+                    error: function (msg) {
+                        console.log(msg);
+                    }
+                });
+            };
+            //菜单获取
+            $.ajax({
+                type: 'POST',
+                url: '/headNav/getHeadNavForGrid',
+                dataType: 'json',
+                success: function (res) {
+
+                    if(res.success){
+                        _this.menuList = res.data;
+                    }
+                },
+                error: function (msg) {
+                    console.log(msg);
+                }
+            });
+        }
+    });
+</script>
+<!--头部end-->
+
+
+<div id=search class=warp><div class=classifySearch-p><div class=classifySearch><div class=classifySearchBar><div onclick=getClassify() class=classify>全部分类<i class=icon iconfont icon-fenlei></i></div> <div class=allSearch><input type=text placeholder=请输入搜索关键字 value=python编程 class=search_txt> <a href=javascript:void(0); onclick=searchBookByName();return false;><i class=icon iconfont icon-search1 search_btn></i></a></div></div> <div class=allClassisy><div class=level-classify level1></div>   <div class=level-classify level2 font-size-14></div>   <p><a href=javascript:void(0); onclick=$('.allClassisy').removeClass('active');tag=false;return false; class=up><i class=icon iconfont icon-xiangshangjiantou up_btn></i></a></p> </div></div></div>  <div class=sort><span tag=publish class=active>最新</span> <span tag=hot class="">最热</span> <span tag=price-up class="">价格
+      <i class=icon iconfont icon-z090></i></span></div> <div class=book-floor><ul class=bookList><div class=demo-spin-col><span class=demo-spin-icon-load></span><p>数据加载中，请稍候…</p></div></ul>  <div class=row><div class=col-md-12><div class=plus-page><span class=firstPage disabled>首页</span><span class=disabled>上一页</span><span class=current>1</span><a href=javascript:; class=tcdNumber>2</a><a href=javascript:; class=tcdNumber>3</a><a href=javascript:; class=tcdNumber>4</a><span>...</span><a href=javascript:; class=tcdNumber>6</a><a href=javascript:; class=nextPage>下一页</a><a href=javascript:; class=endPage>尾页</a><span class=pageCount>共<em>6</em>页</span><div class=pages-more>&nbsp;第<input class=goPage type=text value=1>页<a href=javascript:void(0); class=go>确定</a></div></div></div></div></div></div>
+
+
+
+<!-- footer -->
+<div class=container footer>
+
+  <div class=row>
+    <div class=col-md-12 col-xs-12 footer_nav id=footerNav></div>
+	<!--
+    <div class=col-md-12 col-sm-12 col-xs-12 coop>
+      <div class=col-md-12 col-sm-12 col-xs-12 coop_title>合作伙伴</div>
+      <div id=coop></div>
+    </div>
+	-->
+  </div>
+  <div class=row>
+    <div class=col-md-12>
+      <div class=row qrcode>
+        <div class=col-md-8 col-sm-12 col-xs-12 col-md-offset-2 text-center>
+          <div class=qrcode_item>
+            <div class=img>
+              <img src=/static/portal/img/wx.png alt=读者服务>
+            </div>
+            <h2>关注微信</h2>
+            <p>获取专属服务特权</p>
+          </div>
+          <div class=qrcode_item>
+            <div class=img>
+              <img src=/static/portal/img/wd.png alt=官方微店>
+            </div>
+            <h2>进入微店</h2>
+            <p>立即领取60元优惠券</p>
+          </div>
+          
+            
+              
+            
+            
+          
+        </div>
+      </div>
+      <div class=clear></div>
+      <div class=row footer_text>
+        
+        
+        
+        
+        
+        
+        
+        <p>人民邮电出版社有限公司 <a href=http://beian.miit.gov.cn/ target=_blank>京ICP备 05035396号-1 </a>  All rights reserved <i>Copyright<span>©</span>1998-2017</i></p>
+        <p>
+          出版物经营许可证：新出发京批字第版0151号
+          <a href=http://www.beian.gov.cn/portal/registerSystemInfo?recordcode=11010602130054 target=_blank>
+            <i class=icon_bei></i>京公网安备11010602130054号
+          </a>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div class=right_tools>
+  <a class=goBack href=javascript:void(0);></a>
+  <div class=tools_item>
+    <a class=toolsfont tools-erweima href=javascript:void(0); title=官方微信></a>
+    <div class=tools_img>
+      <img src=/static/portal/img/wx.png alt=官方微信>
+      <div>
+        <p>关注微信</p>
+        <p>获取专属服务特权</p>
+      </div>
+    </div>
+  </div>
+  <div class=tools_item>
+    <a class=toolsfont tools-weidian href=javascript:void(0); title=官方微店></a>
+    <div class=tools_img>
+      <img src=/static/portal/img/wd.png alt=官方微店>
+      <div>
+        <p>进入微店</p>
+        <p>立即领取60元优惠券</p>
+      </div>
+    </div>
+  </div>
+  <div class=tools_item>
+    <a class=toolsfont tools-kefu href=javascript:void(0); title=联系客服></a>
+    <div class=tools_img>
+      <h3>工 作 日：8:30 - 17:00</h3>
+      <h3>联系电话：010-81055052</h3>
+    </div>
+  </div>
+</div>
+
+<script type=text/javascript>
+  $(function () {
+    $.each($('img'),function(index,item){
+      var width = $(item).attr('width');
+      var height = $(item).attr('height');
+      if(width != 'undefined' && width != '100%'){
+        $(item).css({
+          'width':width + 'px',
+          'height':height + 'px'
+        });
+      }
+    });
+    $.ajax({
+      url: '/bottomNav/getBottomNavForGrid',
+      success: function (data) {
+        $.each(data.data, function (index, item) {
+          var str = '<dl class=col-md-2 col-sm-3 col-xs-6><dt>' + item.name + '</dt>';
+          $.each(item.bottomNavItem, function (index, item) {
+            var sectionUrl = '';
+            if (item.urlType == 2) {
+              sectionUrl = item.sectionUrl;
+            } else {
+              var time = new Date();
+              sectionUrl = '' + item.sectionUrl;
+            }
+            str += <dd><a href=' + sectionUrl + ' target='_blank'> + item.name + </a></dd>
+          });
+          str += </dl>;
+          $('#footerNav').append(str);
+        });
+      }
+    });
+    $.ajax({
+      url: '/bottomNavPartner/getBottomNavPartnerListForPortal',
+      success: function (res) {
+        if (res.success) {
+          $.each(res.data, function (index, item) {
+            var sectionUrl = '';
+            if (item.urlType == 2) {
+              sectionUrl = item.partnerUrl;
+            } else {
+              var time = new Date();
+              sectionUrl = '' + item.partnerUrl;
+            }
+            var str = '<div class=col-md-2 col-sm-6 col-xs-6 coop_item>' +
+              '<a href=' + sectionUrl + ' target=_blank>' + '<img src=' + item.picPath + ' alt=' +
+              item.partnetName + '></a></div>';
+            $('#coop').append(str);
+          });
+        }
+      }
+    });
+    if($(window).width() < 768){
+        $('.right_tools').hide();
+    }
+    $(window).scroll(function () {
+      var _t = $(window).scrollTop();
+      if (_t > 100) {
+        $('.goBack').addClass('active').attr('title', '返回顶部');
+      } else {
+        $('.goBack').removeClass('active').attr('title', '向下翻页');
+      }
+    });
+    $(document).on('click', function (e) {
+      if (e.target.className == 'goBack') {
+        $('body,html').animate({
+          scrollTop: 500
+        }, 300);
+      } else if (e.target.className == 'goBack active') {
+        $('body,html').animate({
+          scrollTop: 0
+        }, 500);
+      }
+    });
+  });
+</script>
+
+
+
+<script src=/static/eleBusiness/js/common.js></script>
+
+<script>
+    var search = new Vue({
+        el: #search,
+        data: {
+            desc: true,
+            current: 1,
+            activeIndex: 1,
+            orderStr: '',
+            price: true,
+            priceIcon: true
+        },
+        methods: {
+            descSelect: function (descType) {
+                var $this = this;
+                if (typeof descType == 'string') {
+                    array.orderStr = descType;
+                } else if (descType) {
+                    array.orderStr = 'price-up';
+                    $this.priceIcon = true;
+                } else if (!descType) {
+                    array.orderStr = 'price-low';
+                    $this.priceIcon = false;
+                }
+                newPage.args.current = 1;
+                newPage.init();
+            }
+        },
+        mounted: function () {
+            var status = '';
+            if (status == hot) {
+                this.current = 2;
+            }
+        }
+    });
+    
+    var array = {};
+    var newPage;
+    var listTotal = 100;
+    $(function () {
+
+        newPage = new page('.plus-page', {
+            pageCount: 5,
+            current: 1,
+            listCount: listTotal,
+            textCount: 18,
+            listFlag: false,
+            backFn: function (current, textCount) {
+                $('body,html').animate({scrollTop: 400}, 20);
+                getBookList_search(current, this.textCount, listTotal, array);
+            }
+        });
+        if ("".length > 0) {
+            array = {
+                bookTagId: "",
+                searchStr: python编程,
+                page: 1,
+                rows: newPage.args.textCount,
+                orderStr: search.orderStr
+            };
+        } else if ("".length == 0 && python编程.length == 0 && "".length == 0) {//全部分类
+            array = {page: 1, rows: newPage.args.textCount, orderStr: search.orderStr};
+        } else if ("".length > 0) {//从热销跳转过来或者是从首页二级分类跳转过来
+            array = {
+                page: 1,
+                rows: newPage.args.textCount,
+                bookTagId: "",
+                orderStr: search.orderStr
+            };
+        } else {//点击搜索跳转过来
+            array = {
+                searchStr: python编程,
+                page: 1,
+                rows: newPage.args.textCount,
+                orderStr: search.orderStr
+            };
+        }
+        getBookList_search(1, newPage.args.textCount, listTotal, array);//初始化页面加载图书
+        
+        $(document).on(click, '.level-classify.level2 a', function (event) {
+            $('.level-classify.level2 a').removeClass(active);
+            $(event.target).addClass(active);
+            var tagId = $(event.target).attr(tagId);
+            var searchName = $(.allSearch .search_txt).val();
+            array = {
+                bookTagId: tagId,
+                searchStr: searchName,
+                page: 1,
+                rows: newPage.args.textCount,
+                orderStr: search.orderStr
+            };
+            getBookList_search(1, newPage.args.textCount, listTotal, array);
+        })
+    });
+    
+    function getBookList_search(current, rows, count, array) {
+        var loading = '<div class=demo-spin-col><span class=demo-spin-icon-load></span><p>数据加载中，请稍候…</p></div>';
+        $('.bookList').empty();
+        $('.bookList').append(loading);
+        array.page = current;
+        $.post(/bookinfo/getBookListForEBTag, array, function (data) {
+            if (data.success) {
+                if (count != data.data.total) {
+                    listTotal = data.data.total;
+                    newPage.args = {
+                        listCount: listTotal
+                    };
+                    newPage.init();
+                }
+                var datas = data.data.data;
+                if (datas.length > 0) {
+                    var ele = "";
+                    for (var i = 0; i < datas.length; i++) {
+                        ele += '<li class=item title=' + datas[i].bookName + '>';
+                        if (i + 1 > 7) {
+                            if ((i + 1) % 7 == 0) {
+                                ele += '<a href=/shopping/buy?bookId=' + datas[i].bookId + ' target=_blank style=background:url(' + MCTX + '/static/portal/img/bg7.png)>';
+                            } else {
+                                ele += '<a href=/shopping/buy?bookId=' + datas[i].bookId + ' target=_blank style=background:url(' + MCTX + '/static/portal/img/bg' + ((i + 1) % 7) + '.png)>';
+                            }
+                        } else {
+                            ele += '<a href=/shopping/buy?bookId=' + datas[i].bookId + ' target=_blank style=background:url(' + MCTX + '/static/portal/img/bg' + (i + 1) + '.png)>';
+                        }
+                        
+                        ele += '<img data-original=' + datas[i].picPath + ' class=book-img-shadow lazy/></a>';
+                        ele += '<p><a target=_blank href=/shopping/buy?bookId=' + datas[i].bookId + '>' + datas[i].bookName + '</a></p><p><a href=' + MCTX + '/eleBusiness/detail.jsp?bookId=' + datas[i].bookId + '>￥' + datas[i].discountPrice + '</a></p></li>';
+                        
+                    }
+                    $('.bookList').empty();
+                    $(.bookList).append(ele);
+                    lazyImg();
+                } else {
+                    $('.bookList').empty();
+                    $(.bookList).append('<span class=no_data>暂无数据</span>');
+                }
+            } else {
+                $('.bookList').empty();
+//        console.log(data.msg);
+            }
+            
+        });
+    }
+</script>
+
+
+</body></html>

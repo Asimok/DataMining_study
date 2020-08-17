@@ -8,19 +8,19 @@ from urllib import parse
 import pandas as pd
 import requests
 from lxml import etree
-import jieba
-
-
-jieba.load_userdict('姓名.txt')
 
 read_num = []
 like_num = []
 name = []
 title = []
 push_time = []
+original = []
+# 2020-7-31之前推送统计
+ab_path = '/Users/asimov/PycharmProjects/DataMining_study/大学生新闻中心/工作量统计/'
 start = '2020-03-01'
 end = '2020-07-31'
 OFFSET = 120
+KEY = 'daceb0109d7d5e6811f83a228adffa982dd63a1fb0b331e323030374a3ba2e376845f4cfd6b5c0a0ed1939f00fa639c134ce4372223e5d17ce8df240558b00cf18a1c4d01405a78cb4795ac79ce6fa66e92673f70b20772b0a252e0b876413eb9116ecfafa83ddc160aa4a5d1a55ed36600c0ae3e5f8cdd591922df228ff8302'
 headers = {
     'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_6) AppleWebKit/605.1.15 (KHTML, like Gecko) MicroMessenger/6.8.0(0x16080000) MacWechat/2.4.2(0x12040210) Chrome/39.0.2171.95 Safari/537.36 NetType/WIFI WindowsWechat'
 }
@@ -29,15 +29,10 @@ yuedu_url = 'https://mp.weixin.qq.com/mp/getappmsgext'
 y_param = {}
 param = {
     'action': 'getmsg',
-    '__biz': 'MzAxMjEzODY0Mw==',
     'f': 'json',
-    'offset': 0,
-    'count': 10,
-    'scene': 124,
     'uin': 'MjMyODkzMzMyMQ==',
-    'key': '89e0d01dbcbac2dcf8363305d452b9dce1246a241f1cbb44668f570c3f77ec90ea9f1dfb3591da5627a2054935040c91520429c5e52a411e96212d64a8ea0a3b5b6049d65b6e0021baa5ba2aef75d0918edc1499a4353a732905adcda07749e891becd4c54e506d1d5560050570ecd5e6b26e1bc99b20eb67f3344bb9055db09',
-    'a8scene': 7,
-
+    'key': KEY,
+    '__biz': 'MzAxMjEzODY0Mw=='
 }
 data = {
     'is_only_read': '1',
@@ -48,7 +43,8 @@ is_bottom = False
 
 
 def insert_data(all_data):
-    # print(all_data)
+    # print('插入数据')
+    original.append(all_data['is_original'])
     read_num.append(all_data['read_num'])
     like_num.append(all_data['like_num'])
     push_time.append(get_dime(all_data['datetime']))
@@ -58,10 +54,10 @@ def insert_data(all_data):
 
 
 def get_articles_list():
-    '''
+    """
     获取文章列表
     :return: 返回文章列表 list
-    '''
+    """
 
     articles_json = requests.get(articles_url, params=param, headers=headers, verify=False).json()
     # print(param)
@@ -72,11 +68,11 @@ def get_articles_list():
 
 
 def analysis_articles_list():
-    '''
+    """
     解析文章列表参数
     获取除 文章,点赞，在看的所有信息
     :return: 一个字典
-    '''
+    """
     # 获取 10 篇
     articles_json = get_articles_list()
     articles_info = {}
@@ -108,11 +104,20 @@ def get_articles_digset(articles_info):
     # print(content_url)
 
     content_url = str(content_url).strip()
-    if str(content_url).__eq__(''): return -1
+    if str(content_url).__eq__(''):
+        return -1
     cansu = parse.parse_qs(parse.urlparse(content_url).query)
     html_text = requests.get(content_url, headers=headers).text
     html_text = etree.HTML(html_text)
     html_text = html_text.xpath('//div[@id="js_content"]')[0]
+    # 判断是否原创
+    # articles_info['is_original'] = html_text.xpath('//*[@id="copyright_logo"]/text()')
+    is_original = html_text.xpath('//*[@id="copyright_logo"]/text()')
+    if len(is_original) > 0:
+        articles_info['is_original'] = html_text.xpath('//*[@id="copyright_logo"]/text()')[0]
+    else:
+        articles_info['is_original'] = ''
+    # print(is_original)
     html_text = etree.tostring(html_text, encoding='utf-8').decode('utf-8')
     dr = re.compile(r'<[^>]+>', re.S)
     wenzhang_text = dr.sub('', str(html_text))
@@ -134,31 +139,37 @@ def get_articles_digset(articles_info):
     return articles_info
 
 
-def get_name(data):
+def get_name(temp_data):
     # 匹配列表
-    pattern = ['图文编辑', '责任编辑', '原创文字', '责任编辑', '摄影记者', '视频制作', '图片制作', '原创图片', ':', '：', ' ', ' ']
+    pattern = ['图文编辑：', '责任编辑：', '原创文字：', '责任编辑：', '摄影记者：', '视频制作：', '图片制作：', '原创图片：']
+    exclude = ['\u3000', '\xa0', ' ']
     temp_name = []
-    end_name = ''
-    comment = re.compile('(?<=图文编辑：).*?(?=责任编辑)', re.S)
-    comment1 = comment.findall(data)
+    comment = re.compile('(?=图文编辑：).*?(?=责任编辑)', re.S)
+    comment1 = comment.findall(temp_data)
+
     if len(comment1) > 0:
-        p_name = str(comment1[0])
-        p_name = ''.join(p_name.split())
+        comment1 = str(comment1[0])
+        for i in exclude:
+            comment1 = comment1.replace(i, '')
+
+    temp_name.append(comment1)
+    # 以提取出推送信息
+    # print(temp_name)
+    p_name = ''
+    if len(temp_name) > 0:
+        p_name = str(temp_name[0])
         for i in pattern:
-            p_name = p_name.replace(i, '')
-
-        p_name = jieba.lcut(p_name)
-        for j in p_name:
-            end_name = end_name + " " + j
-    return end_name
+            p_name = p_name.replace(i, ' ' + i)
+        print(p_name)
+    return p_name
 
 
-def get_date_interval(now, start):
+def get_date_interval(now, temp_start):
     # 定义的日期格式需与当前时间格式一致
     # print(date1, date2)
 
     d1 = datetime.datetime.strptime(now, '%Y-%m-%d')
-    d2 = datetime.datetime.strptime(start, '%Y-%m-%d')
+    d2 = datetime.datetime.strptime(temp_start, '%Y-%m-%d')
 
     d = (d1 - d2)
     # print('{}  比  {}  晚：{}天'.format(d1, d2, d.days))
@@ -188,19 +199,21 @@ def main():
                 articles_info = get_articles_digset(articles)
                 if articles_info != -1:
                     # 截止时间
-                    # end = get_dime(articles_info['datetime'])
-                    #
-                    # print(end)
-                    if get_date_interval(str(end), start) >= 0:
+                    temp_end = get_dime(articles_info['datetime'])
+                    # print(articles_info)
+                    if get_date_interval(str(temp_end), start) >= 0:
                         print('正在爬取第', i, '篇')
                         i += 1
                         if len(articles_info) > 0:
-                            insert_data(articles_info)
+                            print(temp_end)
+                            if get_date_interval(end, str(temp_end)) >= 0:
+                                insert_data(articles_info)
+
                         else:
                             outbreak = True
                             break
                     else:
-                        print("已获取 " + str(start) + " 至 "+str(end)+" 推送")
+                        print("已获取 " + str(start) + " 至 " + str(end) + " 推送")
                         print("退出程序")
                         outbreak = True
                         break
@@ -215,22 +228,26 @@ def main():
 
 
 def write_excel():
-    columns = ['日期', '标题', '浏览量', '点赞数', '姓名']
+    columns = ['日期', '标题', '浏览量', '点赞数', '姓名', '原创']
     info = pd.DataFrame(
-        {'标题': title, '浏览量': read_num, '点赞数': like_num, '日期': push_time, '姓名': name},
+        {'标题': title, '浏览量': read_num, '点赞数': like_num, '日期': push_time, '姓名': name, '原创': original},
         columns=columns)
-    if os.path.exists('/opt/mq/pytorch_study/东油微博舆情监督/量化统计.xls'):
-        info1 = pd.read_excel('量化统计.xls')
+    if os.path.exists(ab_path + start + "-" + end + '  量化统计.xls'):
+        info1 = pd.read_excel(ab_path + start + "-" + end + '  量化统计.xls')
+        info1 = info1.drop_duplicates().reset_index(drop=True)
         info = pd.concat([info1, info])
         info = info.drop_duplicates().reset_index(drop=True)
-    info.to_excel('量化统计.xls', index=None)
-    print("文件已保存")
+    info = info.drop_duplicates().reset_index(drop=True)
+    info.to_excel(ab_path + start + "-" + end + '  量化统计.xls', index=None)
+    print("------------------------文件已保存------------------------")
 
 
 if __name__ == "__main__":
     try:
         main()
-    except:
+        write_excel()
+    finally:
         print("发生异常")
         write_excel()
-    write_excel()
+    # main()
+    # write_excel()
